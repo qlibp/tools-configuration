@@ -71,6 +71,7 @@
       (deft-default-extension "org")
       (deft-directory "/root/Desktop/notes/org-roam/"))
 
+(require 'org-journal)
 (use-package org-journal
       :bind
       ("C-c n j" . org-journal-new-entry)
@@ -93,13 +94,33 @@
 (setq reftex-default-bibliography '("~/Desktop/notes/org-roam/manuscript.bib"))
 (setq org-ref-default-bibliography '("~/Desktop/notes/org-roam/manuscript.bib"))
 (setq bibtex-completion-bibliography "~/Desktop/notes/org-roam/manuscript.bib")
+(require 'org-ref-isbn)
 
 (use-package org-roam-bibtex
   :hook (org-roam-mode . org-roam-bibtex-mode)
   :bind (:map org-mode-map
          (("C-c n a" . orb-note-actions))))
+
+(setq orb-preformat-keywords
+   '(("citekey" . "=key=") "title" "url" "file" "author-or-editor" "keywords"))
 (setq orb-templates
       '(("r" "ref" plain (function org-roam-capture--get-point) ""
          :file-name "${citekey}"
          :head "#+TITLE: (ref)${title}\n#+ROAM_KEY: ${ref}\n" ; <--
-         :unnarrowed t)))
+         :unnarrowed t)
+      ("w" "ref+notes" plain (function org-roam-capture--get-point)
+         ""
+         :file-name "${slug}"
+         :head "#+TITLE: ${citekey}: ${title}\n#+ROAM_KEY: ${ref}
+
+- tags ::
+- keywords :: ${keywords}
+
+* ${title}
+:PROPERTIES:
+:Custom_ID: ${citekey}
+:URL: ${url}
+:AUTHOR: ${author-or-editor}
+:NOTER_DOCUMENT: %(orb-process-file-field \"${citekey}\")
+:NOTER_PAGE:
+:END:")))
